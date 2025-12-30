@@ -1,0 +1,43 @@
+---
+const db = Astro.locals.runtime?.env?.DB;
+let posts = [];
+
+try {
+  if (db) {
+    const { results } = await db.prepare("SELECT * FROM Post ORDER BY id DESC").all();
+    posts = results;
+  }
+} catch (e) {
+  console.log("Waiting for DB connection...");
+}
+---
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>The Gazette | Live</title>
+  <meta name="viewport" content="width=device-width" />
+</head>
+<body class="bg-zinc-50 text-zinc-900 font-serif p-10">
+  <header class="border-b-4 border-black pb-6 mb-10">
+    <h1 class="text-6xl font-black uppercase tracking-tighter">The Gazette</h1>
+    <p class="text-xs font-bold uppercase tracking-widest text-zinc-500 mt-2">Global Edition</p>
+  </header>
+
+  <main class="max-w-3xl">
+    {posts.length === 0 ? (
+      <div class="p-10 border-2 border-dashed border-zinc-300 text-center rounded">
+        <h2 class="text-2xl italic text-zinc-400">"The presses are silent..."</h2>
+        <p class="text-xs uppercase mt-2 text-zinc-500">System Ready. Connect 'gazette-db' in Cloudflare.</p>
+      </div>
+    ) : (
+      posts.map((post) => (
+        <article class="mb-12 border-b border-zinc-200 pb-8">
+          <h2 class="text-4xl font-bold mb-4 leading-tight">{post.title}</h2>
+          <p class="text-lg text-zinc-700 leading-relaxed">{post.content}</p>
+        </article>
+      ))
+    )}
+  </main>
+</body>
+</html>
